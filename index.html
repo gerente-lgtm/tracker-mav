@@ -1,0 +1,268 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Tablero MAV · Mundial 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --field-0:#0C1F14; --field-1:#12301E; --panel:#163524; --panel-2:#1E4530;
+    --hair:rgba(212,175,55,.18); --hair-strong:rgba(212,175,55,.42);
+    --cream:#F2EDE0; --dim:#A8BCA6; --gold:#D4AF37; --gold-soft:#C9A227;
+    --sello:#7BC74A; --solsticio:#F2904A; --disruptivo:#B07CEC; --bad:#E5705B;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--field-0);color:var(--cream);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  body{background:radial-gradient(120% 80% at 50% -10%,var(--field-1) 0%,var(--field-0) 70%);
+    min-height:100vh;padding:18px 14px 40px;max-width:760px;margin:0 auto}
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+
+  header{text-align:center;margin-bottom:18px}
+  .crown{font-size:24px;line-height:1;filter:drop-shadow(0 2px 6px rgba(212,175,55,.4))}
+  h1{font-size:21px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;margin-top:6px;color:var(--cream)}
+  h1 .accent{color:var(--gold)}
+  .sub{font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--gold-soft);margin-top:5px;font-weight:600}
+
+  .tabs{display:flex;gap:6px;background:var(--panel);border:1px solid var(--hair);
+    border-radius:11px;padding:5px;margin:16px 0}
+  .tab{flex:1;border:0;background:transparent;color:var(--dim);font-weight:700;font-size:13px;
+    letter-spacing:.04em;padding:10px 6px;border-radius:8px;cursor:pointer;transition:.18s;font-family:inherit}
+  .tab[aria-selected="true"]{background:linear-gradient(180deg,var(--panel-2),#1a3d2a);color:var(--cream);
+    box-shadow:inset 0 0 0 1px var(--hair-strong)}
+  .tab small{display:block;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold-soft);
+    font-weight:600;margin-top:2px}
+
+  .eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-soft);
+    font-weight:700;margin:22px 4px 9px}
+  .eyebrow:first-of-type{margin-top:6px}
+
+  .cards{display:grid;gap:10px}
+  .card{background:linear-gradient(180deg,var(--panel),#122c1d);border:1px solid var(--hair);
+    border-left:4px solid var(--c);border-radius:13px;padding:13px 14px;position:relative;overflow:hidden}
+  .card .row1{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .fname{font-weight:800;font-size:14.5px;letter-spacing:.03em}
+  .ftag{font-size:10px;color:var(--dim);letter-spacing:.05em;margin-top:1px}
+  .pts{font-size:30px;font-weight:800;line-height:.9;color:var(--c)}
+  .pts small{font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.1em;margin-left:3px}
+  .row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:11px}
+  .pos{font-size:12.5px;color:var(--cream)}
+  .pos b{color:var(--c)}
+  .champ{font-size:11px;color:var(--dim);background:rgba(255,255,255,.04);
+    border:1px solid var(--hair);border-radius:20px;padding:3px 9px;white-space:nowrap}
+  .delta{font-size:11px;font-weight:700;letter-spacing:.02em}
+  .up{color:var(--sello)} .down{color:var(--bad)} .flat{color:var(--dim)}
+  .fieldbar{margin-top:10px;height:7px;border-radius:5px;background:rgba(255,255,255,.06);position:relative;overflow:hidden}
+  .fieldbar i{position:absolute;top:0;bottom:0;left:0;background:linear-gradient(90deg,var(--c),transparent);opacity:.5}
+  .fieldbar b{position:absolute;top:-2.5px;width:3px;height:12px;border-radius:2px;background:var(--c);
+    box-shadow:0 0 7px var(--c)}
+  .fieldlab{font-size:9.5px;color:var(--dim);letter-spacing:.08em;margin-top:5px;display:flex;justify-content:space-between}
+
+  .panel{background:linear-gradient(180deg,var(--panel),#122c1d);border:1px solid var(--hair);
+    border-radius:13px;padding:14px}
+  .chartwrap{height:236px;position:relative}
+
+  form .grid{display:grid;gap:9px}
+  label.fld{display:block;font-size:11px;color:var(--dim);letter-spacing:.04em;margin-bottom:4px;font-weight:600}
+  .inline{display:flex;gap:8px}
+  .inline > div{flex:1}
+  input{width:100%;background:#0E2417;border:1px solid var(--hair);color:var(--cream);
+    border-radius:9px;padding:10px;font-size:14px;font-family:inherit}
+  input:focus{outline:none;border-color:var(--gold-soft);box-shadow:0 0 0 2px rgba(212,175,55,.18)}
+  .frow{display:grid;grid-template-columns:1fr 84px 84px;gap:8px;align-items:end;margin-top:9px}
+  .frow .tag{font-weight:700;font-size:13px;padding-bottom:10px;border-bottom:2px solid var(--c)}
+  .actions{display:flex;gap:9px;margin-top:14px}
+  button.go{flex:1;background:linear-gradient(180deg,var(--gold),var(--gold-soft));color:#1a1206;
+    border:0;border-radius:10px;padding:12px;font-weight:800;font-size:14px;letter-spacing:.04em;cursor:pointer;font-family:inherit}
+  button.ghost{background:transparent;color:var(--dim);border:1px solid var(--hair);border-radius:10px;
+    padding:12px 14px;font-weight:600;font-size:12.5px;cursor:pointer;font-family:inherit}
+  .hint{font-size:10.5px;color:var(--dim);margin-top:9px;line-height:1.5}
+  footer{text-align:center;font-size:10px;color:var(--dim);letter-spacing:.12em;margin-top:26px;text-transform:uppercase}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+  <header>
+    <div class="crown">🏆</div>
+    <h1>Tablero <span class="accent">MAV</span></h1>
+    <div class="sub">Mundial 2026 · Entre Amigos FC</div>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" aria-selected="true" data-tab="principal">Principal<small>Posiciones</small></button>
+    <button class="tab" role="tab" aria-selected="false" data-tab="ganagol">Ganagol<small>Partidos 1·X·2</small></button>
+  </div>
+
+  <div class="eyebrow" id="standLab">Posición actual</div>
+  <div class="cards" id="cards"></div>
+
+  <div class="eyebrow">Evolución balance a balance</div>
+  <div class="panel"><div class="chartwrap"><canvas id="chart"></canvas></div></div>
+
+  <div class="eyebrow">Registrar nuevo balance</div>
+  <div class="panel">
+    <form id="addForm">
+      <div class="grid">
+        <div class="inline">
+          <div><label class="fld">Etiqueta</label><input id="f_label" placeholder="B2 · Grupo B" /></div>
+          <div id="fieldWrap"><label class="fld">Campo (total)</label><input id="f_field" type="number" inputmode="numeric" placeholder="197" /></div>
+        </div>
+      </div>
+      <div class="frow" style="--c:var(--sello)"><div class="tag">Sello</div>
+        <div><label class="fld">Puntos</label><input id="s_pts" type="number" inputmode="numeric" /></div>
+        <div><label class="fld" id="s_poslab">Posición</label><input id="s_pos" type="number" inputmode="numeric" /></div></div>
+      <div class="frow" style="--c:var(--solsticio)"><div class="tag">Solsticio</div>
+        <div><label class="fld">Puntos</label><input id="o_pts" type="number" inputmode="numeric" /></div>
+        <div><label class="fld">Posición</label><input id="o_pos" type="number" inputmode="numeric" /></div></div>
+      <div class="frow" style="--c:var(--disruptivo)"><div class="tag">Disrupt.</div>
+        <div><label class="fld">Puntos</label><input id="d_pts" type="number" inputmode="numeric" /></div>
+        <div><label class="fld">Posición</label><input id="d_pos" type="number" inputmode="numeric" /></div></div>
+      <div class="actions">
+        <button type="submit" class="go">Guardar balance</button>
+        <button type="button" class="ghost" id="undo">Deshacer último</button>
+      </div>
+      <div class="hint" id="hint">El campeón de cada formulario es fijo (España · Argentina · Brasil). En Ganagol la posición es opcional.</div>
+    </form>
+  </div>
+
+  <footer>MaNoNo · datos guardados en este dispositivo</footer>
+
+<script>
+const META = {
+  sello:{name:"MAV-Sello", tag:"Probabilidad pura", color:"#7BC74A", champ:"🇪🇸 España"},
+  solsticio:{name:"MAV-Solsticio", tag:"Clima + suerte", color:"#F2904A", champ:"🇦🇷 Argentina"},
+  disruptivo:{name:"MAV-Disruptivo", tag:"Cisne negro", color:"#B07CEC", champ:"🇧🇷 Brasil"},
+};
+const KEYS = ["sello","solsticio","disruptivo"];
+const STORE = "mav-tracker-v1";
+let DB=null, TAB="principal", chart=null, hasStore=(typeof window!=="undefined" && window.storage);
+
+function seed(){
+  return {
+    principal:[{label:"B1 · Grupo A", field:197,
+      forms:{sello:{pts:7,pos:79}, solsticio:{pts:7,pos:79}, disruptivo:{pts:4,pos:176}}}],
+    ganagol:[{label:"B1 · Grupo A", field:196,
+      forms:{sello:{pts:2,pos:1}, solsticio:{pts:2,pos:1}, disruptivo:{pts:0,pos:193}}}]
+  };
+}
+async function load(){
+  if(hasStore){
+    try{ const r=await window.storage.get(STORE); if(r&&r.value){DB=JSON.parse(r.value);return;} }catch(e){}
+  }
+  DB=seed(); await save();
+}
+async function save(){ if(hasStore){ try{ await window.storage.set(STORE, JSON.stringify(DB)); }catch(e){} } }
+
+function deltaTxt(arr, key){
+  if(arr.length<2) return '<span class="delta flat">— nuevo</span>';
+  const now=arr[arr.length-1].forms[key], prev=arr[arr.length-2].forms[key];
+  const dp=now.pts-prev.pts;
+  let ptsTxt = dp>0?`+${dp} pts`:(dp<0?`${dp} pts`:`±0 pts`);
+  if(now.pos!=null && prev.pos!=null){
+    const dpos=prev.pos-now.pos;
+    if(dpos>0) return `<span class="delta up">▲ ${dpos} puestos · ${ptsTxt}</span>`;
+    if(dpos<0) return `<span class="delta down">▼ ${-dpos} puestos · ${ptsTxt}</span>`;
+    return `<span class="delta flat">= ${ptsTxt}</span>`;
+  }
+  return `<span class="delta ${dp>0?'up':'flat'}">${ptsTxt}</span>`;
+}
+
+function renderCards(){
+  const arr=DB[TAB], last=arr[arr.length-1];
+  const isP=TAB==="principal";
+  document.getElementById("standLab").textContent = isP? "Posición actual · pronóstico principal" : "Posición actual · bono ganagol";
+  const html=KEYS.map(k=>{
+    const m=META[k], f=last.forms[k];
+    const posBlock = (f.pos!=null)
+      ? `<span class="pos">Puesto <b>${f.pos}°</b>${last.field?` <span style="color:var(--dim)">/ ${last.field}</span>`:""}</span>`
+      : `<span class="pos" style="color:var(--dim)">acumulado</span>`;
+    const champ = isP? `<span class="champ">👑 ${m.champ}</span>` : `<span class="champ">${m.tag}</span>`;
+    let fb="";
+    if(f.pos!=null && last.field){
+      const pct=Math.max(2,Math.min(100,(f.pos/last.field)*100));
+      fb=`<div class="fieldbar"><i style="width:${pct}%"></i><b style="left:calc(${pct}% - 1.5px)"></b></div>
+          <div class="fieldlab"><span>1° líder</span><span>${last.field}° último</span></div>`;
+    }
+    return `<div class="card" style="--c:${m.color}">
+      <div class="row1">
+        <div><div class="fname">${m.name}</div><div class="ftag">${m.tag}</div></div>
+        <div class="pts mono">${f.pts}<small>PTS</small></div>
+      </div>
+      <div class="row2">${posBlock}${champ}</div>
+      <div style="margin-top:8px">${deltaTxt(arr,k)}</div>
+      ${fb}
+    </div>`;
+  }).join("");
+  document.getElementById("cards").innerHTML=html;
+}
+
+function renderChart(){
+  const arr=DB[TAB];
+  const labels=arr.map(b=>b.label);
+  const ds=KEYS.map(k=>({
+    label:META[k].name, data:arr.map(b=>b.forms[k].pts),
+    borderColor:META[k].color, backgroundColor:META[k].color,
+    tension:.3, borderWidth:2.5, pointRadius:3.5, pointHoverRadius:5,
+    pointBackgroundColor:META[k].color
+  }));
+  const reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+  const cfg={type:"line", data:{labels,datasets:ds},
+    options:{responsive:true,maintainAspectRatio:false,animation:reduce?false:{duration:500},
+      interaction:{mode:"index",intersect:false},
+      plugins:{legend:{labels:{color:"#A8BCA6",font:{size:11},boxWidth:12,boxHeight:12,usePointStyle:true,pointStyle:"line"}},
+        tooltip:{backgroundColor:"#0C1F14",borderColor:"rgba(212,175,55,.4)",borderWidth:1,titleColor:"#D4AF37",bodyColor:"#F2EDE0"}},
+      scales:{x:{ticks:{color:"#A8BCA6",font:{size:10}},grid:{color:"rgba(255,255,255,.05)"}},
+        y:{beginAtZero:true,ticks:{color:"#A8BCA6",font:{size:10}},grid:{color:"rgba(255,255,255,.06)"},title:{display:true,text:"Puntos",color:"#A8BCA6",font:{size:10}}}}}};
+  if(chart) chart.destroy();
+  chart=new Chart(document.getElementById("chart"),cfg);
+}
+
+function syncForm(){
+  const isP=TAB==="principal";
+  document.getElementById("fieldWrap").style.display=isP?"block":"none";
+  document.getElementById("hint").textContent=isP
+    ? "El campeón de cada formulario es fijo (España · Argentina · Brasil). Pon puntos y posición de cada uno."
+    : "Ganagol: registra los puntos acumulados de cada formulario. La posición es opcional.";
+  const lastField = DB[TAB][DB[TAB].length-1].field;
+  document.getElementById("f_field").placeholder = lastField||"197";
+}
+
+function render(){ renderCards(); renderChart(); syncForm(); }
+
+function setTab(t){
+  TAB=t;
+  document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===t));
+  render();
+}
+
+document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+
+document.getElementById("addForm").addEventListener("submit", async e=>{
+  e.preventDefault();
+  const label=document.getElementById("f_label").value.trim();
+  const num=id=>{const v=document.getElementById(id).value.trim(); return v===""?null:Number(v);};
+  if(!label){ document.getElementById("f_label").focus(); return; }
+  const isP=TAB==="principal";
+  const field=isP? (num("f_field") ?? DB[TAB][DB[TAB].length-1].field) : null;
+  const entry={label, field, forms:{
+    sello:{pts:num("s_pts")??0, pos:num("s_pos")},
+    solsticio:{pts:num("o_pts")??0, pos:num("o_pos")},
+    disruptivo:{pts:num("d_pts")??0, pos:num("d_pos")}
+  }};
+  DB[TAB].push(entry); await save();
+  e.target.reset(); render();
+});
+
+document.getElementById("undo").addEventListener("click", async ()=>{
+  if(DB[TAB].length<=1){ return; }
+  if(confirm("¿Borrar el último balance registrado en "+(TAB==="principal"?"Principal":"Ganagol")+"?")){
+    DB[TAB].pop(); await save(); render();
+  }
+});
+
+(async()=>{ await load(); render(); })();
+</script>
+</body>
+</html>
