@@ -1,0 +1,11 @@
+{
+  "actualizado": "2026-06-13",
+  "principal": [
+    {"label": "B1 · Grupo A", "field": 197, "forms": {"sello": {"pts": 7, "pos": 79}, "solsticio": {"pts": 7, "pos": 79}, "disruptivo": {"pts": 4, "pos": 176}}},
+    {"label": "B2 · Grupos B-D", "field": 197, "forms": {"sello": {"pts": 15, "pos": 74}, "solsticio": {"pts": 15, "pos": 74}, "disruptivo": {"pts": 10, "pos": 177}}}
+  ],
+  "ganagol": [
+    {"label": "B1 · Grupo A", "field": 196, "forms": {"sello": {"pts": 2, "pos": 1}, "solsticio": {"pts": 2, "pos": 1}, "disruptivo": {"pts": 0, "pos": 193}}},
+    {"label": "B2 · Grupos B-D", "field": 197, "forms": {"sello": {"pts": 3, "pos": 3}, "solsticio": {"pts": 3, "pos": 3}, "disruptivo": {"pts": 2, "pos": 54}}}
+  ]
+}
