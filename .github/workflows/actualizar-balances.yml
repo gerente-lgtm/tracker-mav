@@ -1,0 +1,39 @@
+name: Actualizar balances desde Notion
+
+on:
+  schedule:
+    - cron: "30 12 * * *"
+    - cron: "30 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Leer Notion y generar balances.json
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+        run: python scripts/actualizar_balances.py
+
+      - name: Commit y push si hubo cambios
+        run: |
+          git config user.name "Agente MAV"
+          git config user.email "actions@github.com"
+          git add balances.json
+          if git diff --staged --quiet; then
+            echo "Sin cambios en balances.json"
+          else
+            git commit -m "Actualiza balances desde Notion"
+            git push
+          fi
