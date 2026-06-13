@@ -92,6 +92,17 @@
   .panel{background:var(--card);border-radius:18px;padding:18px;box-shadow:var(--shadow);border:1px solid transparent}
   [data-theme="dark"] .panel{border-color:var(--hair)}
   .chartwrap{height:240px;position:relative}
+  .tablewrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  thead th{font-size:11px;font-weight:600;color:var(--ink-2);text-align:center;padding:0 0 9px;letter-spacing:-.005em;white-space:nowrap}
+  thead th.bal{text-align:left}
+  tbody td{padding:9px 4px;text-align:center;border-top:1px solid var(--hair);white-space:nowrap;letter-spacing:-.01em}
+  tbody td.bal{text-align:left;font-weight:560;color:var(--ink)}
+  .cellpts{font-weight:640;font-variant-numeric:tabular-nums}
+  .cellpos{font-size:11.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+  .hsello{color:var(--sello)} .hsols{color:var(--solsticio)} .hdisr{color:var(--disruptivo)}
+  .grouphead th{padding-bottom:3px}
+  .grouphead .gsello{color:var(--sello)} .grouphead .gsols{color:var(--solsticio)} .grouphead .gdisr{color:var(--disruptivo)}
 
   label.fld{display:block;font-size:12.5px;color:var(--ink-2);margin-bottom:5px;font-weight:560;letter-spacing:-.01em}
   .inline{display:flex;gap:10px}
@@ -146,6 +157,9 @@
 
   <div class="eyebrow">Evolución balance a balance</div>
   <div class="panel"><div class="chartwrap"><canvas id="chart"></canvas></div></div>
+
+  <div class="eyebrow">Histórico de puntos y posición</div>
+  <div class="panel tablewrap"><table id="histTable"></table></div>
 
   <div class="panel" id="sourceNote">
     <div class="srcrow">
@@ -265,7 +279,33 @@ function renderChart(){
         y:{beginAtZero:true,ticks:{color:P.tick,font:{size:11}},grid:{color:P.grid,drawTicks:false},border:{display:false}}}}};
   chart=new Chart(document.getElementById("chart"),cfg);
 }
-function render(){ renderCards(); renderChart(); }
+function renderTable(){
+  const arr=DB[TAB]||[];
+  const t=document.getElementById("histTable");
+  if(!arr.length){ t.innerHTML=""; return; }
+  const head = `<thead>
+    <tr class="grouphead">
+      <th class="bal" rowspan="2">Balance</th>
+      <th class="gsello" colspan="2">Sello</th>
+      <th class="gsols" colspan="2">Solsticio</th>
+      <th class="gdisr" colspan="2">Disrupt.</th>
+    </tr>
+    <tr>
+      <th>Pts</th><th>Pos</th><th>Pts</th><th>Pos</th><th>Pts</th><th>Pos</th>
+    </tr></thead>`;
+  const pos = v => (v!=null ? v+"°" : "—");
+  const rows = arr.map(b=>{
+    const s=b.forms.sello, o=b.forms.solsticio, d=b.forms.disruptivo;
+    return `<tr>
+      <td class="bal">${b.label}</td>
+      <td class="cellpts hsello">${s.pts}</td><td class="cellpos">${pos(s.pos)}</td>
+      <td class="cellpts hsols">${o.pts}</td><td class="cellpos">${pos(o.pos)}</td>
+      <td class="cellpts hdisr">${d.pts}</td><td class="cellpos">${pos(d.pos)}</td>
+    </tr>`;
+  }).join("");
+  t.innerHTML = head + "<tbody>" + rows + "</tbody>";
+}
+function render(){ renderCards(); renderChart(); renderTable(); }
 
 function setTab(t){ TAB=t;
   document.querySelectorAll(".tab").forEach(b=>b.setAttribute("aria-selected", b.dataset.tab===t));
