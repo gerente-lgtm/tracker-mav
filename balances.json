@@ -42,16 +42,16 @@
       "field": 199,
       "forms": {
         "sello": {
-          "pts": 4,
-          "pos": 18
+          "pts": 28,
+          "pos": 51
         },
         "solsticio": {
-          "pts": 4,
-          "pos": 18
+          "pts": 28,
+          "pos": 51
         },
         "disruptivo": {
-          "pts": 4,
-          "pos": 18
+          "pts": 21,
+          "pos": 177
         }
       }
     }
@@ -98,16 +98,16 @@
       "field": 199,
       "forms": {
         "sello": {
-          "pts": 3,
-          "pos": 3
+          "pts": 4,
+          "pos": 18
         },
         "solsticio": {
-          "pts": 3,
-          "pos": 3
+          "pts": 4,
+          "pos": 18
         },
         "disruptivo": {
-          "pts": 2,
-          "pos": 53
+          "pts": 4,
+          "pos": 18
         }
       }
     }
