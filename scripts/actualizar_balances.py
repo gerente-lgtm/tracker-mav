@@ -10,7 +10,7 @@ import json
 import urllib.request
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
-DATA_SOURCE_ID = os.environ.get("NOTION_DB_ID", "bad6f75f-3852-40c6-a86d-1f299bbd7d48")
+DATA_SOURCE_ID = os.environ.get("NOTION_DB_ID", "45d7083a-287f-45b0-8791-ca66a1ee2c5d")
 NOTION_VERSION = "2022-06-28"
 
 
