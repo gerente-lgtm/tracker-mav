@@ -17,6 +17,11 @@ on:
 permissions:
   contents: write
 
+# Las acciones checkout@v4 / setup-python@v5 corren en Node 20 (deprecado).
+# Esto las fuerza a Node 24 desde ya y silencia el aviso de deprecación.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
   actualizar:
     runs-on: ubuntu-latest
