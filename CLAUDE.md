@@ -41,8 +41,10 @@ pronósticos del Mundial 2026.
 - El script usa el **database_id** `45d7083a-287f-45b0-8791-ca66a1ee2c5d` en la API
   (`/v1/databases/{id}/query`). **NO** usar el data_source_id (`bad6f75f-...`) ahí:
   causa error 404. Override por env var `NOTION_DB_ID` si hace falta.
-- Auth: **`NOTION_TOKEN`** (integración Notion "Agente MAV"). Ahora con permiso de
-  **lectura y escritura** (el tracker solo lee; la ingesta de PDFs escribe).
+- Auth: **`NOTION_TOKEN`** (integración Notion "Agente MAV"). Capacidades necesarias:
+  **Read + Update + Insert content**. El tracker solo lee; la ingesta de PDFs hace
+  *update* (filas existentes) e *insert* (filas nuevas). Ojo: sin **Insert content**,
+  crear un balance nuevo da `403 Forbidden` (actualizar sí funciona) — fue un tropiezo real.
   El código lee todo de `os.environ` — nunca escribir claves en el repo.
 - Columnas de la base: Etiqueta (title), Juego (Principal/Ganagol), Orden, Campo,
   y `{Sello,Solsticio,Disruptivo} pts` + `{...} pos`, Fecha.
