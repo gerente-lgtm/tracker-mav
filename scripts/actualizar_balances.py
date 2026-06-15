@@ -7,7 +7,18 @@ Requiere el secreto NOTION_TOKEN en el repo.
 
 import os
 import json
+import datetime
 import urllib.request
+
+_MESES_ABR = ["ene", "feb", "mar", "abr", "may", "jun",
+              "jul", "ago", "sep", "oct", "nov", "dic"]
+
+
+def sello_tiempo_colombia():
+    """Fecha y hora actual en hora Colombia (UTC-5), p.ej. '14/jun/2026 17:45'."""
+    tz = datetime.timezone(datetime.timedelta(hours=-5))
+    n = datetime.datetime.now(tz)
+    return f"{n.day}/{_MESES_ABR[n.month - 1]}/{n.year} {n.hour:02d}:{n.minute:02d}"
 
 NOTION_TOKEN = os.environ["NOTION_TOKEN"]
 DATA_SOURCE_ID = os.environ.get("NOTION_DB_ID", "45d7083a-287f-45b0-8791-ca66a1ee2c5d")
@@ -88,10 +99,26 @@ def main():
     filas = consultar_notion()
     balances = construir_balances(filas)
     out = os.path.join(os.getcwd(), "balances.json")
+
+    # Conservar el sello de tiempo si los DATOS no cambiaron (para no generar
+    # commits cada 30 min). Solo se actualiza cuando cambia algún balance.
+    previo = None
+    if os.path.exists(out):
+        try:
+            with open(out, encoding="utf-8") as fp:
+                previo = json.load(fp)
+        except Exception:
+            previo = None
+    sin_cambios = (previo is not None
+                   and previo.get("principal") == balances["principal"]
+                   and previo.get("ganagol") == balances["ganagol"]
+                   and previo.get("actualizado"))
+    balances["actualizado"] = previo["actualizado"] if sin_cambios else sello_tiempo_colombia()
+
     with open(out, "w", encoding="utf-8") as fp:
         json.dump(balances, fp, ensure_ascii=False, indent=2)
     print(f"balances.json generado: {len(balances['principal'])} principal, "
-          f"{len(balances['ganagol'])} ganagol.")
+          f"{len(balances['ganagol'])} ganagol. Actualizado: {balances['actualizado']}")
 
 
 if __name__ == "__main__":

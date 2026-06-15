@@ -41,17 +41,50 @@ pronósticos del Mundial 2026.
 - El script usa el **database_id** `45d7083a-287f-45b0-8791-ca66a1ee2c5d` en la API
   (`/v1/databases/{id}/query`). **NO** usar el data_source_id (`bad6f75f-...`) ahí:
   causa error 404. Override por env var `NOTION_DB_ID` si hace falta.
-- Auth: secreto de repo **`NOTION_TOKEN`** (integración Notion "Agente MAV", solo lectura).
+- Auth: **`NOTION_TOKEN`** (integración Notion "Agente MAV"). Ahora con permiso de
+  **lectura y escritura** (el tracker solo lee; la ingesta de PDFs escribe).
   El código lee todo de `os.environ` — nunca escribir claves en el repo.
 - Columnas de la base: Etiqueta (title), Juego (Principal/Ganagol), Orden, Campo,
   y `{Sello,Solsticio,Disruptivo} pts` + `{...} pos`, Fecha.
 
 ## Flujo de mantenimiento
 
-1. El organizador publica un balance tras cada partido → se agrega una fila en la base de
-   Notion "Tracker MAV — Balances" → este repo lo recoge solo (workflow) y actualiza el tablero.
-2. Los reportes intermedios durante un partido no son definitivos; el balance definitivo es
-   cuando termina toda la jornada.
+El organizador publica un PDF de balance tras cada partido. Hay dos caminos para
+llevar esos datos a Notion (y de ahí, vía workflow, al tablero):
+
+1. **Automático desde PDF (lo normal).** Se deja el PDF en una carpeta y un script
+   lo lee y escribe la fila en Notion. Ver "Ingesta de balances desde PDF" abajo.
+2. **Manual.** Agregar/editar la fila directamente en la base de Notion
+   "Tracker MAV — Balances".
+
+En ambos casos: el workflow regenera `balances.json` (cada 30 min en franja de
+partidos) y el tablero se actualiza. Los reportes **intermedios** durante un partido
+NO son definitivos; el balance definitivo es cuando termina toda la jornada.
+
+`balances.json` lleva un campo `actualizado` (fecha/hora hora Colombia) que el
+tablero muestra como "Última actualización"; solo cambia cuando cambian los datos.
+
+## Ingesta de balances desde PDF (local, no versionado)
+
+- [scripts/pdf_a_notion.py](scripts/pdf_a_notion.py): lee los PDF de balances con
+  **pdfplumber**, **descarta los parciales** (partidos sin marcar, "Parcial",
+  "Pronósticos ajustados hasta…") y hace *upsert* de las 3 formas MAV (pts + pos,
+  Principal y Ganagol) en Notion, por (número de balance + juego). La parte de Notion
+  usa solo stdlib (`urllib`); pdfplumber es la única dependencia externa y **solo
+  corre en local**, no en GitHub Actions.
+- Carpeta local **`balances_pdf/`** (ignorada por git, ver `.gitignore`):
+  - `pendientes/` → aquí se dejan los PDF (también desde el celular, vía OneDrive).
+  - `procesados/` → definitivos ya subidos (los mueve el script).
+  - `parciales/` → parciales apartados automáticamente.
+  - `ingesta.log` → registro de cada corrida.
+  - `Actualizar tablero.bat` → lanzador manual (doble-clic).
+- **Automatización local:** Tarea Programada de Windows **"MAV - Ingesta balances"**
+  corre `pythonw scripts/pdf_a_notion.py --dir …\pendientes --log …\ingesta.log`
+  cada 30 min, 1 PM–1 AM (hora Colombia), como el usuario (para ver `NOTION_TOKEN`).
+  Requiere el PC encendido y con sesión iniciada.
+- El secreto se guarda en Windows con `setx NOTION_TOKEN "..."` (variable de usuario).
+- ⚠️ Repo **público**: los PDF traen datos de otros participantes. NUNCA versionarlos
+  (el `.gitignore` bloquea `*.pdf` y `balances_pdf/`).
 
 ## Convenciones al editar
 
@@ -59,7 +92,8 @@ pronósticos del Mundial 2026.
   ni introducir build tools salvo que Martín lo pida.
 - No editar `balances.json` a mano: es salida del script. Si cambia el esquema del JSON,
   ajustar `construir_balances()` en el script **y** el render en `index.html`.
-- Mantener el script sin dependencias externas (solo stdlib de Python).
+- `actualizar_balances.py` (corre en GitHub Actions): mantenerlo **sin dependencias
+  externas** (solo stdlib). `pdf_a_notion.py` sí usa pdfplumber, pero corre solo en local.
 - Commits y comentarios en español, como el resto del repo.
 - No commitear datos personales ni secretos. Las credenciales van solo como secretos
   del repo en GitHub (`NOTION_TOKEN`).
