@@ -29,6 +29,9 @@ pronósticos del Mundial 2026.
   - Tarjetas por formulario, gráfica Chart.js (CDN) de evolución, y tabla histórica
     (puntos + posición balance a balance).
   - Lee los datos con `fetch("balances.json?ts=...")`. **No** hay backend.
+  - Botón "Actualizar datos" (`#refreshBtn`) en el encabezado: re-lee `balances.json`
+    y repinta (solo cliente). NO regenera desde Notion (eso requeriría un token, que
+    no puede ir en una página pública).
 - [balances.json](balances.json): datos que consume el tablero. **Generado**, no editar a mano.
 - [scripts/actualizar_balances.py](scripts/actualizar_balances.py): lee la base de Notion
   "Tracker MAV — Balances" y reescribe `balances.json`. Solo stdlib (`urllib`), sin deps.

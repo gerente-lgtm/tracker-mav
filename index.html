@@ -44,6 +44,9 @@
     box-shadow:var(--shadow);transition:.2s}
   .toggle:hover{transform:scale(1.05)}
   .toggle svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8}
+  .hbtns{display:flex;gap:8px;flex:none}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .toggle.spin svg{animation:spin .6s linear infinite}
   .icon-sun{display:none}
   [data-theme="dark"] .icon-sun{display:block}
   [data-theme="dark"] .icon-moon{display:none}
@@ -136,10 +139,15 @@
       <h1>Tablero MAV</h1>
       <div class="sub">Mundial 2026 · Entre Amigos FC</div>
     </div>
-    <button class="toggle" id="themeBtn" aria-label="Cambiar tema">
-      <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8" stroke-linecap="round"/></svg>
-    </button>
+    <div class="hbtns">
+      <button class="toggle" id="refreshBtn" aria-label="Actualizar datos" title="Actualizar datos">
+        <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4.5V9h-4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="toggle" id="themeBtn" aria-label="Cambiar tema">
+        <svg class="icon-moon" viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2.5M12 19.5V22M4.2 4.2l1.8 1.8M18 18l1.8 1.8M2 12h2.5M19.5 12H22M4.2 19.8l1.8-1.8M18 6l1.8-1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
   </header>
 
   <div class="tabs" role="tablist">
@@ -322,6 +330,14 @@ function initTheme(){
 
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 document.getElementById("themeBtn").addEventListener("click",()=>{ applyTheme(THEME==="dark"?"light":"dark"); render(); });
+
+async function refrescar(){
+  const b=document.getElementById("refreshBtn");
+  b.classList.add("spin");
+  try{ await load(); render(); }
+  finally{ setTimeout(()=>b.classList.remove("spin"), 600); }
+}
+document.getElementById("refreshBtn").addEventListener("click", refrescar);
 
 initTheme();
 (async ()=>{ await load(); render(); })();
