@@ -33,7 +33,7 @@ pronósticos del Mundial 2026.
 - [scripts/actualizar_balances.py](scripts/actualizar_balances.py): lee la base de Notion
   "Tracker MAV — Balances" y reescribe `balances.json`. Solo stdlib (`urllib`), sin deps.
 - [.github/workflows/actualizar-balances.yml](.github/workflows/actualizar-balances.yml):
-  corre el script cada 30 min en franja de partidos (18:00–06:00 UTC = 1 PM–1 AM COL),
+  corre el script cada 10 min en franja de partidos (18:00–06:00 UTC = 1 PM–1 AM COL),
   y hace commit/push de `balances.json` si cambió. También se dispara a mano (Actions).
 
 ## Notion (fuente de datos)
@@ -59,7 +59,7 @@ esos datos a Notion (y de ahí, vía workflow, al tablero):
    "Tracker MAV — Balances".
 
 En ambos casos el workflow `actualizar-balances.yml` regenera `balances.json`
-(cada 30 min en franja de partidos) y el tablero se actualiza. Los reportes
+(cada 10 min en franja de partidos) y el tablero se actualiza. Los reportes
 **intermedios** durante un partido NO son definitivos; el definitivo es cuando
 termina toda la jornada.
 
@@ -83,7 +83,7 @@ tablero muestra como "Última actualización"; solo cambia cuando cambian los da
 - El buzón es **privado** porque los PDF traen datos de otros participantes; NUNCA
   van en este repo público (el `.gitignore` bloquea `*.pdf` por si acaso).
 - **Uso:** subir el PDF a `pendientes/` del buzón (desde el celular). En ~1 min el
-  Action escribe en Notion; el tablero se actualiza en ≤30 min.
+  Action escribe en Notion; el tablero se actualiza en ≤10 min.
 - **Depurar en local:** `python scripts/pdf_a_notion.py --file X.pdf --dry-run`
   (no escribe en Notion; requiere pdfplumber instalado).
 

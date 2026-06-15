@@ -5,13 +5,13 @@ name: Actualizar balances desde Notion
 # workflow para commitear (sin tokens extra).
 #
 # Juan publica un balance después de cada partido. Para capturarlo pronto sin
-# gastar corridas de madrugada, corre cada 30 min SOLO en la franja de partidos.
+# gastar corridas de madrugada, corre cada 10 min SOLO en la franja de partidos.
 # Franja activa: 18:00 a 06:00 UTC = 1:00 PM a 1:00 AM hora Colombia (UTC-5).
 # También se puede disparar a mano desde la pestaña Actions.
 on:
   schedule:
-    - cron: "0,30 18-23 * * *"
-    - cron: "0,30 0-6 * * *"
+    - cron: "*/10 18-23 * * *"
+    - cron: "*/10 0-6 * * *"
   workflow_dispatch:
 
 permissions:
