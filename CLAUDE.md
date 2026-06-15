@@ -49,42 +49,43 @@ pronósticos del Mundial 2026.
 
 ## Flujo de mantenimiento
 
-El organizador publica un PDF de balance tras cada partido. Hay dos caminos para
-llevar esos datos a Notion (y de ahí, vía workflow, al tablero):
+El organizador publica un PDF de balance tras cada partido. Caminos para llevar
+esos datos a Notion (y de ahí, vía workflow, al tablero):
 
-1. **Automático desde PDF (lo normal).** Se deja el PDF en una carpeta y un script
-   lo lee y escribe la fila en Notion. Ver "Ingesta de balances desde PDF" abajo.
+1. **Automático, sin PC (lo normal).** Se sube el PDF a un repo privado "buzón" y
+   un GitHub Action lo procesa y escribe la fila en Notion. Ver "Ingesta de
+   balances desde PDF" abajo.
 2. **Manual.** Agregar/editar la fila directamente en la base de Notion
    "Tracker MAV — Balances".
 
-En ambos casos: el workflow regenera `balances.json` (cada 30 min en franja de
-partidos) y el tablero se actualiza. Los reportes **intermedios** durante un partido
-NO son definitivos; el balance definitivo es cuando termina toda la jornada.
+En ambos casos el workflow `actualizar-balances.yml` regenera `balances.json`
+(cada 30 min en franja de partidos) y el tablero se actualiza. Los reportes
+**intermedios** durante un partido NO son definitivos; el definitivo es cuando
+termina toda la jornada.
 
-`balances.json` lleva un campo `actualizado` (fecha/hora hora Colombia) que el
+`balances.json` lleva el campo `actualizado` (fecha/hora hora Colombia) que el
 tablero muestra como "Última actualización"; solo cambia cuando cambian los datos.
 
-## Ingesta de balances desde PDF (local, no versionado)
+## Ingesta de balances desde PDF (repo privado "buzón")
 
-- [scripts/pdf_a_notion.py](scripts/pdf_a_notion.py): lee los PDF de balances con
-  **pdfplumber**, **descarta los parciales** (partidos sin marcar, "Parcial",
-  "Pronósticos ajustados hasta…") y hace *upsert* de las 3 formas MAV (pts + pos,
-  Principal y Ganagol) en Notion, por (número de balance + juego). La parte de Notion
-  usa solo stdlib (`urllib`); pdfplumber es la única dependencia externa y **solo
-  corre en local**, no en GitHub Actions.
-- Carpeta local **`balances_pdf/`** (ignorada por git, ver `.gitignore`):
-  - `pendientes/` → aquí se dejan los PDF (también desde el celular, vía OneDrive).
-  - `procesados/` → definitivos ya subidos (los mueve el script).
-  - `parciales/` → parciales apartados automáticamente.
-  - `ingesta.log` → registro de cada corrida.
-  - `Actualizar tablero.bat` → lanzador manual (doble-clic).
-- **Automatización local:** Tarea Programada de Windows **"MAV - Ingesta balances"**
-  corre `pythonw scripts/pdf_a_notion.py --dir …\pendientes --log …\ingesta.log`
-  cada 30 min, 1 PM–1 AM (hora Colombia), como el usuario (para ver `NOTION_TOKEN`).
-  Requiere el PC encendido y con sesión iniciada.
-- El secreto se guarda en Windows con `setx NOTION_TOKEN "..."` (variable de usuario).
-- ⚠️ Repo **público**: los PDF traen datos de otros participantes. NUNCA versionarlos
-  (el `.gitignore` bloquea `*.pdf` y `balances_pdf/`).
+- **El parser vive aquí:** [scripts/pdf_a_notion.py](scripts/pdf_a_notion.py). Lee
+  los PDF con **pdfplumber**, **descarta los parciales** (partidos sin marcar,
+  "Parcial", "Pronósticos ajustados hasta…") y hace *upsert* de las 3 formas MAV
+  (pts + pos, Principal y Ganagol) en Notion por (número de balance + juego). La
+  parte de Notion usa solo stdlib (`urllib`); pdfplumber es la única dependencia.
+- **Dónde corre (sin PC):** en un **repo privado aparte** (el "buzón"). Un Action se
+  dispara al subir un PDF a su carpeta `pendientes/`; instala pdfplumber, **descarga
+  este parser por URL cruda**
+  (`raw.githubusercontent.com/gerente-lgtm/tracker-mav/main/scripts/pdf_a_notion.py`),
+  lo corre con `NOTION_TOKEN` (secreto del repo privado) y archiva el PDF en
+  `procesados/` o `parciales/`. **Por eso `pdf_a_notion.py` debe seguir en este repo
+  público** (no tiene secretos).
+- El buzón es **privado** porque los PDF traen datos de otros participantes; NUNCA
+  van en este repo público (el `.gitignore` bloquea `*.pdf` por si acaso).
+- **Uso:** subir el PDF a `pendientes/` del buzón (desde el celular). En ~1 min el
+  Action escribe en Notion; el tablero se actualiza en ≤30 min.
+- **Depurar en local:** `python scripts/pdf_a_notion.py --file X.pdf --dry-run`
+  (no escribe en Notion; requiere pdfplumber instalado).
 
 ## Convenciones al editar
 
@@ -92,8 +93,9 @@ tablero muestra como "Última actualización"; solo cambia cuando cambian los da
   ni introducir build tools salvo que Martín lo pida.
 - No editar `balances.json` a mano: es salida del script. Si cambia el esquema del JSON,
   ajustar `construir_balances()` en el script **y** el render en `index.html`.
-- `actualizar_balances.py` (corre en GitHub Actions): mantenerlo **sin dependencias
-  externas** (solo stdlib). `pdf_a_notion.py` sí usa pdfplumber, pero corre solo en local.
+- `actualizar_balances.py` (corre en GitHub Actions de ESTE repo): mantenerlo **sin
+  dependencias externas** (solo stdlib). `pdf_a_notion.py` sí usa pdfplumber y corre
+  en el Action del repo privado "buzón" (que lo descarga de aquí).
 - Commits y comentarios en español, como el resto del repo.
 - No commitear datos personales ni secretos. Las credenciales van solo como secretos
   del repo en GitHub (`NOTION_TOKEN`).
