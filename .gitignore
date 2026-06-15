@@ -1,0 +1,15 @@
+# Repo PÚBLICO: nunca versionar PDFs ni datos personales de los participantes.
+*.pdf
+
+# Carpeta local de ingesta de balances (PDFs de Juan + lanzador). Vive dentro
+# del repo por comodidad, pero NO se versiona.
+balances_pdf/
+
+# Restos por si quedaran de versiones anteriores.
+Balances PDF*/
+pendientes/
+procesados/
+
+# Secretos locales (por si acaso).
+.env
+*.token

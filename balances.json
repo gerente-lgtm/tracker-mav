@@ -43,15 +43,15 @@
       "forms": {
         "sello": {
           "pts": 28,
-          "pos": 51
+          "pos": 66
         },
         "solsticio": {
           "pts": 28,
-          "pos": 51
+          "pos": 66
         },
         "disruptivo": {
           "pts": 21,
-          "pos": 177
+          "pos": 189
         }
       }
     }
@@ -59,7 +59,7 @@
   "ganagol": [
     {
       "label": "B1 · Grupo A",
-      "field": 196,
+      "field": 197,
       "forms": {
         "sello": {
           "pts": 2,
@@ -99,15 +99,15 @@
       "forms": {
         "sello": {
           "pts": 4,
-          "pos": 18
+          "pos": 19
         },
         "solsticio": {
           "pts": 4,
-          "pos": 18
+          "pos": 19
         },
         "disruptivo": {
           "pts": 4,
-          "pos": 18
+          "pos": 19
         }
       }
     }
