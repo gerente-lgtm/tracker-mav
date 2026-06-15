@@ -32,9 +32,36 @@ import sys
 import json
 import time
 import shutil
+import datetime
 import argparse
 import urllib.request
 import urllib.error
+
+
+class _Tee:
+    """Escribe a la consola (si existe) y a un archivo de log a la vez."""
+    def __init__(self, logfile, console):
+        self.logfile = logfile
+        self.console = console
+
+    def write(self, s):
+        try:
+            self.logfile.write(s)
+        except Exception:
+            pass
+        if self.console:
+            try:
+                self.console.write(s)
+            except Exception:
+                pass
+
+    def flush(self):
+        for t in (self.logfile, self.console):
+            try:
+                if t:
+                    t.flush()
+            except Exception:
+                pass
 
 DB_ID = os.environ.get("NOTION_DB_ID", "45d7083a-287f-45b0-8791-ca66a1ee2c5d")
 NOTION_VERSION = "2022-06-28"
@@ -248,15 +275,27 @@ def resumen(info):
             f"Disruptivo {d['disruptivo']['pts']}/pos {d['disruptivo']['pos']}")
 
 
-def procesar_uno(path, token, dry_run, mover, dir_procesados):
+def mover_a(path, carpeta):
+    """Mueve el archivo a 'carpeta', sobrescribiendo si ya existía uno igual."""
+    os.makedirs(carpeta, exist_ok=True)
+    dest = os.path.join(carpeta, os.path.basename(path))
+    if os.path.exists(dest):
+        os.remove(dest)
+    shutil.move(path, dest)
+
+
+def procesar_uno(path, token, dry_run, mover, dir_procesados, dir_parciales):
     nombre = os.path.basename(path)
     try:
         info = parsear(path)
     except Exception as e:
-        print(f"[ERROR] {nombre}: {e}  -> no se sube nada")
+        print(f"[ERROR] {nombre}: {e}  -> no se sube nada (se deja en pendientes)")
         return False
     if info.get("parcial"):
         print(f"[OMITIDO] {nombre}: Balance {info['numero']} {info['juego']} es PARCIAL")
+        if mover and not dry_run and dir_parciales:
+            mover_a(path, dir_parciales)
+            print(f"    -> apartado a parciales")
         return False
     print(f"[OK] {nombre}\n    {resumen(info)}")
     if dry_run:
@@ -265,8 +304,7 @@ def procesar_uno(path, token, dry_run, mover, dir_procesados):
     estado = subir(token, info)
     print(f"    -> fila {estado} en Notion")
     if mover and dir_procesados:
-        os.makedirs(dir_procesados, exist_ok=True)
-        shutil.move(path, os.path.join(dir_procesados, nombre))
+        mover_a(path, dir_procesados)
         print(f"    -> movido a procesados")
     return True
 
@@ -281,7 +319,16 @@ def main():
     ap.add_argument("--file", help="procesar un solo PDF")
     ap.add_argument("--dry-run", action="store_true", help="no escribir en Notion")
     ap.add_argument("--no-move", action="store_true", help="no mover a procesados")
+    ap.add_argument("--log", help="archivo donde anexar la salida (para la tarea programada)")
     args = ap.parse_args()
+
+    if args.log:
+        try:
+            f = open(args.log, "a", encoding="utf-8")
+            sys.stdout = _Tee(f, sys.stdout)
+            print(f"\n===== {datetime.datetime.now().isoformat(timespec='seconds')} =====")
+        except Exception:
+            pass
 
     token = os.environ.get("NOTION_TOKEN")
     if not args.dry_run and not token:
@@ -289,14 +336,16 @@ def main():
 
     if args.file:
         pdfs = [args.file]
-        dir_procesados = os.path.join(os.path.dirname(os.path.abspath(args.file)), "procesados")
+        base = os.path.dirname(os.path.abspath(args.file))
     else:
         carpeta = args.dir or os.environ.get("BALANCES_PDF_DIR")
         if not carpeta:
             sys.exit("Indica --dir CARPETA o define BALANCES_PDF_DIR.")
         pdfs = sorted(os.path.join(carpeta, f) for f in os.listdir(carpeta)
                       if f.lower().endswith(".pdf"))
-        dir_procesados = os.path.join(carpeta, "..", "procesados")
+        base = os.path.join(carpeta, "..")
+    dir_procesados = os.path.join(base, "procesados")
+    dir_parciales = os.path.join(base, "parciales")
 
     if not pdfs:
         print("No hay PDFs para procesar.")
@@ -304,7 +353,8 @@ def main():
 
     ok = 0
     for path in pdfs:
-        if procesar_uno(path, token, args.dry_run, not args.no_move, dir_procesados):
+        if procesar_uno(path, token, args.dry_run, not args.no_move,
+                        dir_procesados, dir_parciales):
             ok += 1
         time.sleep(0.2)  # cortesía con la API
     print(f"\nListo: {ok}/{len(pdfs)} subidos/validados.")
