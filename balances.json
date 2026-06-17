@@ -1,9 +1,10 @@
 {
-  "actualizado": "17/jun/2026 12:10",
+  "actualizado": "17/jun/2026 16:19",
   "principal": [
     {
       "label": "B1 · Grupo A",
       "field": 197,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 7,
@@ -22,6 +23,7 @@
     {
       "label": "B2 · Grupos B-D",
       "field": 197,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 15,
@@ -40,6 +42,7 @@
     {
       "label": "B3 · Grupos B-D",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 28,
@@ -58,6 +61,7 @@
     {
       "label": "B4 · Grupos E-F",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 42,
@@ -76,6 +80,7 @@
     {
       "label": "B5 · Grupos G-H",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 50,
@@ -94,6 +99,7 @@
     {
       "label": "B6 · Grupos I-J",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 67,
@@ -108,12 +114,32 @@
           "pos": 158
         }
       }
+    },
+    {
+      "label": "B7 · Grupos K-L",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 69,
+          "pos": 96
+        },
+        "solsticio": {
+          "pts": 69,
+          "pos": 96
+        },
+        "disruptivo": {
+          "pts": 64,
+          "pos": 151
+        }
+      }
     }
   ],
   "ganagol": [
     {
       "label": "B1 · Grupo A",
       "field": 197,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 2,
@@ -132,6 +158,7 @@
     {
       "label": "B2 · Grupos B-D",
       "field": 197,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 3,
@@ -150,6 +177,7 @@
     {
       "label": "B3 · Grupos B-D",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 4,
@@ -168,6 +196,7 @@
     {
       "label": "B4 · Grupos E-F",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 6,
@@ -186,6 +215,7 @@
     {
       "label": "B5 · Grupos G-H",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 6,
@@ -204,6 +234,7 @@
     {
       "label": "B6 · Grupos I-J",
       "field": 199,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 10,
@@ -216,6 +247,25 @@
         "disruptivo": {
           "pts": 10,
           "pos": 39
+        }
+      }
+    },
+    {
+      "label": "B7 · Grupos K-L",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 10,
+          "pos": 42
+        },
+        "solsticio": {
+          "pts": 9,
+          "pos": 104
+        },
+        "disruptivo": {
+          "pts": 10,
+          "pos": 42
         }
       }
     }
