@@ -92,9 +92,13 @@ tablero muestra como "Última actualización"; solo cambia cuando cambian los da
 ## Ingesta de balances desde PDF (repo privado "buzón")
 
 - **El parser vive aquí:** [scripts/pdf_a_notion.py](scripts/pdf_a_notion.py). Lee
-  los PDF con **pdfplumber**, **descarta los parciales** (partidos sin marcar,
-  "Parcial", "Pronósticos ajustados hasta…") y hace *upsert* de las 3 formas MAV
-  (pts + pos, Principal y Ganagol) en Notion por (número de balance + juego). La
+  los PDF con **pdfplumber** y hace *upsert* de las 3 formas MAV (pts + pos, Principal y
+  Ganagol) en Notion por (número de balance + juego). **Marca cada fila como parcial o
+  definitiva** (`es_parcial` detecta "Parcial", partidos sin marcar, "ajustados hasta…")
+  en la columna checkbox **`Parcial`**. Como el parcial y su definitivo comparten
+  (número + juego), van a la **misma fila**: un parcial nuevo pisa al anterior y el
+  definitivo apaga la marca. El tablero muestra el aviso "Parcial" en tarjeta, tabla y
+  gráfica. Un parcial cuyo ranking no se puede leer se aparta a `parciales/` sin subir. La
   parte de Notion usa solo stdlib (`urllib`); pdfplumber es la única dependencia.
 - **Dónde corre (sin PC):** en un **repo privado aparte** (el "buzón"). Un Action se
   dispara al subir un PDF a su carpeta `pendientes/`; instala pdfplumber, **descarga

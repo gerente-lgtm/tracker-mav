@@ -80,6 +80,16 @@
   .status i{width:8px;height:8px;border-radius:50%;display:inline-block}
   .st-g i{background:var(--g)} .st-y i{background:var(--y)} .st-r i{background:var(--r)}
   .champ{font-size:12.5px;color:var(--ink-2);background:var(--chip-bg);border-radius:100px;padding:4px 11px;white-space:nowrap}
+  .parcial{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;
+    background:var(--chip-bg);border-radius:100px;padding:4px 11px 4px 9px;color:var(--ink);white-space:nowrap}
+  .parcial i{width:8px;height:8px;border-radius:50%;background:var(--y);display:inline-block}
+  .parcial-aviso{display:none;align-items:center;gap:9px;background:color-mix(in srgb,var(--y) 13%,var(--card));
+    border:1px solid color-mix(in srgb,var(--y) 38%,transparent);color:var(--ink);
+    border-radius:13px;padding:10px 13px;font-size:13px;line-height:1.4;margin:0 4px 13px;letter-spacing:-.01em}
+  .parcial-aviso.show{display:flex}
+  .parcial-aviso i{width:9px;height:9px;border-radius:50%;background:var(--y);flex:none;
+    box-shadow:0 0 0 4px color-mix(in srgb,var(--y) 20%,transparent)}
+  .parcial-aviso b{font-weight:640}
   .delta{font-size:13px;font-weight:560;margin-top:11px;padding-left:8px;letter-spacing:-.01em}
   .up{color:var(--g)} .down{color:var(--r)} .flat{color:var(--ink-3)}
   .fieldbar{margin:12px 0 0 8px;height:6px;border-radius:100px;background:var(--bg-2);position:relative;overflow:hidden}
@@ -106,6 +116,9 @@
   .hsello{color:var(--sello)} .hsols{color:var(--solsticio)} .hdisr{color:var(--disruptivo)}
   .grouphead th{padding-bottom:3px}
   .grouphead .gsello{color:var(--sello)} .grouphead .gsols{color:var(--solsticio)} .grouphead .gdisr{color:var(--disruptivo)}
+  tbody tr.esparcial td{background:color-mix(in srgb,var(--y) 8%,transparent)}
+  .baltag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+    color:var(--ink-2);background:var(--chip-bg);border-radius:100px;padding:2px 7px;margin-left:7px;vertical-align:middle}
 
   label.fld{display:block;font-size:12.5px;color:var(--ink-2);margin-bottom:5px;font-weight:560;letter-spacing:-.01em}
   .inline{display:flex;gap:10px}
@@ -156,6 +169,7 @@
   </div>
 
   <div class="eyebrow" id="standLab">Posición actual</div>
+  <div class="parcial-aviso" id="parcialAviso"></div>
   <div class="cards" id="cards"></div>
   <div class="legend">
     <span><i style="background:var(--g)"></i>Zona alta</span>
@@ -245,6 +259,16 @@ function renderCards(){
     return;
   }
   const last=arr[arr.length-1];
+  const aviso=document.getElementById("parcialAviso");
+  if(aviso){
+    if(last.parcial){
+      aviso.className="parcial-aviso show";
+      aviso.innerHTML=`<i></i><span><b>Balance parcial:</b> datos provisionales de ${last.label} mientras se juega la jornada. Cambiarán cuando se publique el balance definitivo.</span>`;
+    }else{
+      aviso.className="parcial-aviso"; aviso.innerHTML="";
+    }
+  }
+  const parcialChip = last.parcial?`<span class="parcial"><i></i>Parcial</span>`:"";
   document.getElementById("cards").innerHTML = KEYS.map(k=>{
     const m=META[k], f=last.forms[k], c=color(k);
     const posBlock = f.pos!=null
@@ -264,7 +288,7 @@ function renderCards(){
         <div><div class="fname"><span class="fdot"></span>${m.name}</div><div class="ftag">${m.tag}</div></div>
         <div class="pts mono">${f.pts}<small>PUNTOS</small></div>
       </div>
-      <div class="row2">${posBlock}<span class="chips">${stChip}${champ}</span></div>
+      <div class="row2">${posBlock}<span class="chips">${parcialChip}${stChip}${champ}</span></div>
       ${deltaTxt(arr,k)}
       ${fb}
     </div>`;
@@ -274,11 +298,16 @@ function renderChart(){
   const arr=DB[TAB]||[], P=PALETTE[THEME];
   if(chart) chart.destroy();
   if(!arr.length){ return; }
+  const n=arr.length, finParcial = !!arr[n-1].parcial;
+  const esUltParcial = i => (i===n-1 && finParcial);
   const ds=KEYS.map(k=>({label:META[k].name, data:arr.map(b=>b.forms[k].pts),
     borderColor:P[k], backgroundColor:P[k], tension:.35, borderWidth:2.5,
-    pointRadius:3.5, pointHoverRadius:5.5, pointBackgroundColor:P[k]}));
+    pointHoverRadius:6, pointBackgroundColor:P[k],
+    pointRadius:arr.map((b,i)=>esUltParcial(i)?5.5:3.5),
+    pointStyle:arr.map((b,i)=>esUltParcial(i)?"rectRot":"circle"),
+    segment:{borderDash:ctx=>(finParcial && ctx.p1DataIndex===n-1)?[6,4]:undefined}}));
   const reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
-  const cfg={type:"line", data:{labels:arr.map(b=>b.label), datasets:ds},
+  const cfg={type:"line", data:{labels:arr.map(b=>b.parcial?(b.label+" · parcial"):b.label), datasets:ds},
     options:{responsive:true,maintainAspectRatio:false,animation:reduce?false:{duration:450},
       interaction:{mode:"index",intersect:false},
       plugins:{legend:{labels:{color:P.tick,font:{size:12},boxWidth:14,boxHeight:14,usePointStyle:true,pointStyle:"circle",padding:16}},
@@ -304,8 +333,9 @@ function renderTable(){
   const pos = v => (v!=null ? v+"°" : "—");
   const rows = arr.map(b=>{
     const s=b.forms.sello, o=b.forms.solsticio, d=b.forms.disruptivo;
-    return `<tr>
-      <td class="bal">${b.label}</td>
+    const tag = b.parcial?`<span class="baltag">Parcial</span>`:"";
+    return `<tr class="${b.parcial?'esparcial':''}">
+      <td class="bal">${b.label}${tag}</td>
       <td class="cellpts hsello">${s.pts}</td><td class="cellpos">${pos(s.pos)}</td>
       <td class="cellpts hsols">${o.pts}</td><td class="cellpos">${pos(o.pos)}</td>
       <td class="cellpts hdisr">${d.pts}</td><td class="cellpos">${pos(d.pos)}</td>

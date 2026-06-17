@@ -40,6 +40,7 @@ Los datos salen de una base de Notion ("Tracker MAV — Balances"). El flujo es 
     {
       "label": "B1 · Grupo A",
       "field": 197,                       // tamaño del campo (participantes)
+      "parcial": false,                   // true = balance provisional (en juego); el tablero lo avisa
       "forms": {
         "sello":      { "pts": 7, "pos": 79 },
         "solsticio":  { "pts": 7, "pos": 79 },
@@ -86,10 +87,12 @@ Esto regenera `balances.json` en la raíz del repo.
 ## Cargar balances desde PDF
 
 El organizador publica cada balance como PDF. El script
-[`scripts/pdf_a_notion.py`](scripts/pdf_a_notion.py) los lee (con `pdfplumber`),
-**descarta los parciales** (partidos sin marcar, "Parcial", "Pronósticos ajustados
-hasta…") y escribe las 3 formas MAV (puntos + posición, Principal y Ganagol) en Notion,
-haciendo *upsert* por (número de balance + juego).
+[`scripts/pdf_a_notion.py`](scripts/pdf_a_notion.py) los lee (con `pdfplumber`) y escribe
+las 3 formas MAV (puntos + posición, Principal y Ganagol) en Notion, haciendo *upsert* por
+(número de balance + juego). Distingue **parcial** vs **definitivo** (detecta "Parcial",
+partidos sin marcar, "ajustados hasta…") y lo guarda en la columna `Parcial`. El parcial y
+su definitivo comparten fila: un parcial nuevo reemplaza al anterior y el definitivo apaga
+la marca. El tablero muestra el aviso "Parcial" mientras el balance no sea definitivo.
 
 En producción corre **sin PC**, en un **repo privado aparte** ("buzón"): al subir un PDF a
 su carpeta `pendientes/`, un GitHub Action descarga este script por URL cruda y lo ejecuta

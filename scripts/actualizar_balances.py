@@ -66,6 +66,10 @@ def texto_select(prop):
     return sel.get("name") if sel else None
 
 
+def es_checkbox(prop):
+    return bool(prop.get("checkbox")) if prop else False
+
+
 def construir_balances(filas):
     registros = []
     for f in filas:
@@ -75,6 +79,7 @@ def construir_balances(filas):
             "juego": (texto_select(p.get("Juego")) or "").lower(),
             "orden": num(p.get("Orden")) or 0,
             "field": num(p.get("Campo")),
+            "parcial": es_checkbox(p.get("Parcial")),
             "sello": {"pts": num(p.get("Sello pts")) or 0, "pos": num(p.get("Sello pos"))},
             "solsticio": {"pts": num(p.get("Solsticio pts")) or 0, "pos": num(p.get("Solsticio pos"))},
             "disruptivo": {"pts": num(p.get("Disruptivo pts")) or 0, "pos": num(p.get("Disruptivo pos"))},
@@ -84,7 +89,7 @@ def construir_balances(filas):
         items = [r for r in registros if r["juego"] == juego]
         items.sort(key=lambda x: x["orden"])
         return [{
-            "label": r["etiqueta"], "field": r["field"],
+            "label": r["etiqueta"], "field": r["field"], "parcial": r["parcial"],
             "forms": {"sello": r["sello"], "solsticio": r["solsticio"], "disruptivo": r["disruptivo"]}
         } for r in items]
 

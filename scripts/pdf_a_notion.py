@@ -8,11 +8,12 @@ USO TÍPICO (a demanda):
     python scripts/pdf_a_notion.py --dir "RUTA\\Balances PDF (privado)\\pendientes"
 
 Procesa todos los *.pdf de esa carpeta:
-  - DESCARTA los balances parciales (partidos sin marcar, "Parcial",
-    "Pronósticos ajustados hasta…").
-  - De los DEFINITIVOS, extrae pts y posición de las 3 formas para Principal
-    y Ganagol y hace upsert en Notion por (número de balance + juego).
-  - Mueve cada PDF procesado a ..\\procesados.
+  - Extrae pts y posición de las 3 formas (Sello/Solsticio/Disruptivo) para
+    Principal y Ganagol y hace upsert en Notion por (número de balance + juego).
+  - Marca la fila como PARCIAL o definitiva según el PDF ("Parcial", partidos
+    sin marcar…). El parcial y su definitivo comparten fila (mismo número), así
+    que un parcial nuevo pisa al anterior y el definitivo apaga la marca.
+  - Mueve cada PDF a ..\\procesados (definitivo) o ..\\parciales (parcial).
 
 Banderas:
   --file ARCHIVO   procesar un solo PDF
@@ -183,21 +184,28 @@ def extraer_mav(filas):
 
 
 def parsear(path):
-    """Lee un PDF y devuelve un dict con todo lo necesario, o lanza ValueError."""
+    """Lee un PDF y devuelve un dict con todo lo necesario, o lanza ValueError.
+
+    Procesa tanto definitivos como parciales: el flag 'parcial' indica cuál es.
+    El parcial y su definitivo comparten (número + juego), así que se suben a la
+    misma fila de Notion (un parcial nuevo pisa al anterior; el definitivo apaga
+    la marca). Un parcial cuyo ranking no se puede leer se marca 'incompleto'
+    (no hay datos que mostrar) para apartarlo sin error."""
     texto, filas = leer_pdf(path)
     juego = detectar_juego(texto)
     numero = detectar_numero(texto)
     fecha = detectar_fecha(texto)
     if not juego or not numero:
         raise ValueError("no pude identificar juego o número de balance")
-    if es_parcial(texto):
-        return {"parcial": True, "juego": juego, "numero": numero}
+    parcial = es_parcial(texto)
     datos, campo = extraer_mav(filas)
     faltan = [f for f in FORMAS if f not in datos]
     if faltan:
+        if parcial:
+            return {"parcial": True, "incompleto": True, "juego": juego, "numero": numero}
         raise ValueError(f"no encontré las filas de MAV: {', '.join(faltan)}")
     return {
-        "parcial": False,
+        "parcial": parcial,
         "juego": juego,
         "numero": numero,
         "fecha": fecha,
@@ -244,6 +252,7 @@ def construir_props(info):
         "Solsticio pos": {"number": d["solsticio"]["pos"]},
         "Disruptivo pts": {"number": d["disruptivo"]["pts"]},
         "Disruptivo pos": {"number": d["disruptivo"]["pos"]},
+        "Parcial": {"checkbox": bool(info.get("parcial"))},
     }
     if info.get("campo"):
         props["Campo"] = {"number": info["campo"]}
@@ -291,21 +300,25 @@ def procesar_uno(path, token, dry_run, mover, dir_procesados, dir_parciales):
     except Exception as e:
         print(f"[ERROR] {nombre}: {e}  -> no se sube nada (se deja en pendientes)")
         return False
-    if info.get("parcial"):
-        print(f"[OMITIDO] {nombre}: Balance {info['numero']} {info['juego']} es PARCIAL")
+    if info.get("incompleto"):
+        print(f"[OMITIDO] {nombre}: Balance {info['numero']} {info['juego']} "
+              f"PARCIAL sin ranking legible (nada que mostrar)")
         if mover and not dry_run and dir_parciales:
             mover_a(path, dir_parciales)
             print(f"    -> apartado a parciales")
         return False
-    print(f"[OK] {nombre}\n    {resumen(info)}")
+    es_par = bool(info.get("parcial"))
+    print(f"[OK] {nombre} ({'PARCIAL' if es_par else 'definitivo'})\n    {resumen(info)}")
     if dry_run:
         print("    (dry-run: no se escribió en Notion)")
         return True
     estado = subir(token, info)
-    print(f"    -> fila {estado} en Notion")
-    if mover and dir_procesados:
-        mover_a(path, dir_procesados)
-        print(f"    -> movido a procesados")
+    print(f"    -> fila {estado} en Notion (Parcial={es_par})")
+    if mover:
+        destino = dir_parciales if es_par else dir_procesados
+        if destino:
+            mover_a(path, destino)
+            print(f"    -> movido a {'parciales' if es_par else 'procesados'}")
     return True
 
 
