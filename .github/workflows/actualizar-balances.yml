@@ -4,14 +4,20 @@ name: Actualizar balances desde Notion
 # repo. El tracker (index.html) lee ese archivo. Usa el permiso por defecto del
 # workflow para commitear (sin tokens extra).
 #
-# Juan publica un balance después de cada partido. Para capturarlo pronto sin
-# gastar corridas de madrugada, corre cada 10 min SOLO en la franja de partidos.
-# Franja activa: 18:00 a 06:00 UTC = 1:00 PM a 1:00 AM hora Colombia (UTC-5).
-# También se puede disparar a mano desde la pestaña Actions.
+# Se dispara por EVENTO: cuando el repo "buzón" termina de escribir un balance
+# en Notion, llama a la API de GitHub (repository_dispatch, tipo
+# "balance-actualizado") y este workflow corre al instante. Así el tracker se
+# actualiza apenas se sube el balance, sin polling.
+#
+# El cron queda solo como RESPALDO (2 latidos al día), por si el disparo falla
+# o si alguna vez se edita Notion a mano: 23:00 UTC = 6 PM y 05:00 UTC = 12 AM
+# hora Colombia (UTC-5). También se puede disparar a mano desde la pestaña Actions.
 on:
+  repository_dispatch:
+    types: [balance-actualizado]
   schedule:
-    - cron: "*/10 18-23 * * *"
-    - cron: "*/10 0-6 * * *"
+    - cron: "0 23 * * *"
+    - cron: "0 5 * * *"
   workflow_dispatch:
 
 permissions:
