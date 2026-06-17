@@ -56,8 +56,11 @@ Los datos salen de una base de Notion ("Tracker MAV — Balances"). El flujo es 
 El workflow [`.github/workflows/actualizar-balances.yml`](.github/workflows/actualizar-balances.yml)
 ejecuta el script y, si `balances.json` cambió, hace commit y push.
 
-- **Programado:** cada 10 min en la franja de partidos
-  (18:00–06:00 UTC ≈ 1:00 PM–1:00 AM hora Colombia, UTC-5).
+- **Por evento (lo normal):** cuando el repo "buzón" termina de escribir un balance en
+  Notion, dispara este workflow con `repository_dispatch` (tipo `balance-actualizado`) y
+  el tablero se actualiza en segundos. Ver [Cargar balances desde PDF](#cargar-balances-desde-pdf).
+- **Respaldo programado:** 23:00 y 05:00 UTC (≈ 6:00 PM y 12:00 AM hora Colombia, UTC-5),
+  por si el disparo falla o si se edita Notion a mano.
 - **Manual:** pestaña **Actions → "Actualizar balances desde Notion" → Run workflow**.
 
 ### Configuración necesaria
@@ -66,6 +69,8 @@ ejecuta el script y, si `balances.json` cambió, hace commit y push.
   lectura sobre la base de balances.
 - (Opcional) variable de entorno `NOTION_DB_ID` para apuntar a otra base; por defecto usa
   el `database_id` de la base "Tracker MAV — Balances".
+- El disparo por evento requiere un secreto **`TRACKER_DISPATCH_PAT`** en el **repo buzón**
+  (no en este): un token de GitHub con `Contents: write` sobre `tracker-mav`.
 
 El script solo usa la biblioteca estándar de Python (sin dependencias que instalar).
 
@@ -89,7 +94,9 @@ haciendo *upsert* por (número de balance + juego).
 En producción corre **sin PC**, en un **repo privado aparte** ("buzón"): al subir un PDF a
 su carpeta `pendientes/`, un GitHub Action descarga este script por URL cruda y lo ejecuta
 con `NOTION_TOKEN` (la integración de Notion necesita permiso de *Insert/Update content*).
-Así un balance se carga subiendo el PDF, incluso desde el celular.
+Al terminar, ese mismo Action dispara el workflow de este repo (`repository_dispatch`) para
+que regenere `balances.json` al instante. Así un balance se carga subiendo el PDF —incluso
+desde el celular— y el tablero se actualiza en segundos.
 
 > Los PDF contienen datos de otros participantes: van en el repo privado, **nunca aquí**.
 > El [`.gitignore`](.gitignore) bloquea `*.pdf` por seguridad.

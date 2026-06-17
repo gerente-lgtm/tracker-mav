@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
 Guía para trabajar en este repo. Este directorio es el repo **`tracker-mav`**
 (remote: https://github.com/gerente-lgtm/tracker-mav, **público**), que es el
 **Componente 1 (Tracker web)** + el script de balances del **Componente 3 (Notion)**
@@ -36,8 +38,22 @@ pronósticos del Mundial 2026.
 - [scripts/actualizar_balances.py](scripts/actualizar_balances.py): lee la base de Notion
   "Tracker MAV — Balances" y reescribe `balances.json`. Solo stdlib (`urllib`), sin deps.
 - [.github/workflows/actualizar-balances.yml](.github/workflows/actualizar-balances.yml):
-  corre el script cada 10 min en franja de partidos (18:00–06:00 UTC = 1 PM–1 AM COL),
-  y hace commit/push de `balances.json` si cambió. También se dispara a mano (Actions).
+  corre el script y hace commit/push de `balances.json` si cambió. Se dispara **por
+  evento** (`repository_dispatch` tipo `balance-actualizado`) cuando el buzón termina de
+  escribir en Notion; un **cron de respaldo** (23:00 y 05:00 UTC = 6 PM y 12 AM COL) cubre
+  fallos del disparo o ediciones a mano en Notion. También se dispara a mano (Actions).
+
+## Comandos
+
+No hay build, lint ni tests. Es un sitio estático + scripts de stdlib.
+
+- **Ver el tablero en local:** `python -m http.server 8000` y abrir
+  `http://localhost:8000`. Abrir `index.html` con `file://` **no** funciona porque hace
+  `fetch("balances.json")`.
+- **Regenerar `balances.json` desde Notion:** `python scripts/actualizar_balances.py`
+  (requiere `NOTION_TOKEN` en el entorno).
+- **Probar el parser de PDF sin escribir en Notion:**
+  `python scripts/pdf_a_notion.py --file BALANCE.pdf --dry-run` (requiere pdfplumber).
 
 ## Notion (fuente de datos)
 
@@ -63,8 +79,10 @@ esos datos a Notion (y de ahí, vía workflow, al tablero):
 2. **Manual.** Agregar/editar la fila directamente en la base de Notion
    "Tracker MAV — Balances".
 
-En ambos casos el workflow `actualizar-balances.yml` regenera `balances.json`
-(cada 10 min en franja de partidos) y el tablero se actualiza. Los reportes
+En ambos casos el workflow `actualizar-balances.yml` regenera `balances.json` y el
+tablero se actualiza. En el camino automático (1) el buzón **dispara el workflow al
+instante** (`repository_dispatch`) al terminar de escribir en Notion; el camino manual (2)
+queda cubierto por el cron de respaldo (o disparándolo a mano en Actions). Los reportes
 **intermedios** durante un partido NO son definitivos; el definitivo es cuando
 termina toda la jornada.
 
@@ -85,10 +103,16 @@ tablero muestra como "Última actualización"; solo cambia cuando cambian los da
   lo corre con `NOTION_TOKEN` (secreto del repo privado) y archiva el PDF en
   `procesados/` o `parciales/`. **Por eso `pdf_a_notion.py` debe seguir en este repo
   público** (no tiene secretos).
+- **Dispara el tracker al terminar:** como último paso, el Action del buzón hace
+  `POST /repos/gerente-lgtm/tracker-mav/dispatches` con `{"event_type":"balance-actualizado"}`
+  usando el secreto **`TRACKER_DISPATCH_PAT`** del buzón (un PAT con `Contents: write`
+  sobre `tracker-mav`; el `GITHUB_TOKEN` normal no puede disparar workflows cross-repo).
+  Eso lanza `actualizar-balances.yml` de inmediato. Disparar de más es inocuo: el
+  workflow es idempotente y no commitea si Notion no cambió.
 - El buzón es **privado** porque los PDF traen datos de otros participantes; NUNCA
   van en este repo público (el `.gitignore` bloquea `*.pdf` por si acaso).
 - **Uso:** subir el PDF a `pendientes/` del buzón (desde el celular). En ~1 min el
-  Action escribe en Notion; el tablero se actualiza en ≤10 min.
+  Action escribe en Notion y dispara el tracker; el tablero se actualiza en segundos.
 - **Depurar en local:** `python scripts/pdf_a_notion.py --file X.pdf --dry-run`
   (no escribe en Notion; requiere pdfplumber instalado).
 
