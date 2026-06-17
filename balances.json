@@ -121,16 +121,16 @@
       "parcial": true,
       "forms": {
         "sello": {
-          "pts": 69,
-          "pos": 96
+          "pts": 73,
+          "pos": 92
         },
         "solsticio": {
-          "pts": 69,
-          "pos": 96
+          "pts": 73,
+          "pos": 92
         },
         "disruptivo": {
-          "pts": 64,
-          "pos": 151
+          "pts": 68,
+          "pos": 146
         }
       }
     }
