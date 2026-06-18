@@ -1,5 +1,5 @@
 {
-  "actualizado": "18/jun/2026 16:27",
+  "actualizado": "18/jun/2026 16:28",
   "principal": [
     {
       "label": "B1 · Grupo A",
@@ -285,6 +285,25 @@
         "disruptivo": {
           "pts": 12,
           "pos": 66
+        }
+      }
+    },
+    {
+      "label": "B8 · Grupos A-B",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 13,
+          "pos": 24
+        },
+        "solsticio": {
+          "pts": 12,
+          "pos": 80
+        },
+        "disruptivo": {
+          "pts": 12,
+          "pos": 80
         }
       }
     }
