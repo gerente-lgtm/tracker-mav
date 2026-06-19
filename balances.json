@@ -1,5 +1,5 @@
 {
-  "actualizado": "18/jun/2026 19:27",
+  "actualizado": "18/jun/2026 22:38",
   "principal": [
     {
       "label": "B1 · Grupo A",
@@ -137,7 +137,7 @@
     {
       "label": "B8 · Grupos A-B",
       "field": 199,
-      "parcial": true,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 81,
