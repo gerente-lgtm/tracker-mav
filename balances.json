@@ -190,6 +190,25 @@
           "pos": 151
         }
       }
+    },
+    {
+      "label": "B11 · Grupos G-H",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 97,
+          "pos": 49
+        },
+        "solsticio": {
+          "pts": 95,
+          "pos": 76
+        },
+        "disruptivo": {
+          "pts": 88,
+          "pos": 145
+        }
+      }
     }
   ],
   "ganagol": [
