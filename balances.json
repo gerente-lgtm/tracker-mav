@@ -1,5 +1,5 @@
 {
-  "actualizado": "22/jun/2026 05:36",
+  "actualizado": "22/jun/2026 20:38",
   "principal": [
     {
       "label": "B1 · Grupo A",
@@ -207,6 +207,25 @@
         "disruptivo": {
           "pts": 92,
           "pos": 93
+        }
+      }
+    },
+    {
+      "label": "B12 · Grupos I-J",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 105,
+          "pos": 17
+        },
+        "solsticio": {
+          "pts": 103,
+          "pos": 29
+        },
+        "disruptivo": {
+          "pts": 88,
+          "pos": 159
         }
       }
     }
@@ -418,6 +437,25 @@
         "disruptivo": {
           "pts": 23,
           "pos": 31
+        }
+      }
+    },
+    {
+      "label": "B12 · Grupos I-J",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 27,
+          "pos": 8
+        },
+        "solsticio": {
+          "pts": 24,
+          "pos": 65
+        },
+        "disruptivo": {
+          "pts": 26,
+          "pos": 21
         }
       }
     }
