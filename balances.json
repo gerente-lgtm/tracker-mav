@@ -709,19 +709,19 @@
     {
       "label": "B19",
       "field": 199,
-      "parcial": true,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 50,
-          "pos": 9
+          "pos": 13
         },
         "solsticio": {
           "pts": 46,
-          "pos": 46
+          "pos": 58
         },
         "disruptivo": {
           "pts": 46,
-          "pos": 46
+          "pos": 58
         }
       }
     }
