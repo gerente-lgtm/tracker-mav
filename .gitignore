@@ -13,3 +13,7 @@ procesados/
 # Secretos locales (por si acaso).
 .env
 *.token
+
+# Artefactos de Python (al correr los scripts en local).
+__pycache__/
+*.pyc

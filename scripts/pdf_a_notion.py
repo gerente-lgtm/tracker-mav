@@ -119,11 +119,21 @@ def detectar_numero(texto):
 
 
 def detectar_fecha(texto):
-    m = re.search(r"(\d{1,2})\.([A-Za-z]{3})\.(\d{4})", texto)
+    """Fecha del balance en ISO (YYYY-MM-DD), o None si no se puede leer con
+    certeza. El '(?<!\\d)' evita enganchar dígitos de un número más largo
+    (p. ej. de '289.JUN.2026' NO tomar '89' como día), y se valida que la
+    fecha exista de verdad: ante la duda devuelve None (la columna Fecha es
+    opcional y el tablero no la usa) en vez de mandar una fecha inválida que
+    Notion rechazaría con error 400."""
+    m = re.search(r"(?<!\d)(\d{1,2})\.([A-Za-z]{3})\.(\d{4})", texto)
     if not m:
         return None
     dia, mes, anio = m.group(1), m.group(2).upper(), m.group(3)
     if mes not in MESES:
+        return None
+    try:
+        datetime.date(int(anio), int(MESES[mes]), int(dia))
+    except ValueError:
         return None
     return f"{anio}-{MESES[mes]}-{int(dia):02d}"
 
