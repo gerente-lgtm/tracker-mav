@@ -418,6 +418,25 @@
           "pos": 66
         }
       }
+    },
+    {
+      "label": "B23",
+      "field": 199,
+      "parcial": true,
+      "forms": {
+        "sello": {
+          "pts": 198,
+          "pos": 16
+        },
+        "solsticio": {
+          "pts": 206,
+          "pos": 2
+        },
+        "disruptivo": {
+          "pts": 182,
+          "pos": 82
+        }
+      }
     }
   ],
   "ganagol": [
