@@ -899,19 +899,19 @@
     {
       "label": "B24",
       "field": 199,
-      "parcial": true,
+      "parcial": false,
       "forms": {
         "sello": {
-          "pts": 72,
+          "pts": 76,
           "pos": 8
         },
         "solsticio": {
-          "pts": 64,
-          "pos": 64
+          "pts": 68,
+          "pos": 61
         },
         "disruptivo": {
-          "pts": 60,
-          "pos": 107
+          "pts": 64,
+          "pos": 99
         }
       }
     }
