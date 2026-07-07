@@ -975,19 +975,19 @@
     {
       "label": "B26",
       "field": 199,
-      "parcial": true,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 84,
-          "pos": 5
+          "pos": 8
         },
         "solsticio": {
           "pts": 72,
-          "pos": 68
+          "pos": 78
         },
         "disruptivo": {
-          "pts": 64,
-          "pos": 136
+          "pts": 68,
+          "pos": 109
         }
       }
     }
