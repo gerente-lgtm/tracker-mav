@@ -1,5 +1,5 @@
 {
-  "actualizado": "7/jul/2026 20:14",
+  "actualizado": "7/jul/2026 20:27",
   "principal": [
     {
       "label": "B1 · Grupo A",
@@ -498,7 +498,7 @@
     {
       "label": "B27",
       "field": 199,
-      "parcial": true,
+      "parcial": false,
       "forms": {
         "sello": {
           "pts": 294,
