@@ -1085,6 +1085,25 @@
           "pos": 63
         }
       }
+    },
+    {
+      "label": "B29",
+      "field": 199,
+      "parcial": false,
+      "forms": {
+        "sello": {
+          "pts": 104,
+          "pos": 8
+        },
+        "solsticio": {
+          "pts": 92,
+          "pos": 56
+        },
+        "disruptivo": {
+          "pts": 92,
+          "pos": 56
+        }
+      }
     }
   ]
 }
